@@ -1,6 +1,7 @@
 "use strict";
 const cache = {}
 /**
+ * No of Sums of the form N = m + ... with d digits
  * N = Sum to make
  * d = no of summands
  * m = leading summand
@@ -29,7 +30,11 @@ const f = (N, d, m, ind) => {
 
 function sums(N){
     let _s = 0;
-    for(let d = 3; d<=N+1;d++) _s += f(2*N-1, d, N-1, '')
+    for (let d=2; d<=N;d++) {
+        for (let m=Math.ceil(N/d); m <= N-d+1; m++) {
+            _s += f(N, d, m, '')
+        }
+    }
     return _s;
 }
 
