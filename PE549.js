@@ -1,6 +1,6 @@
 const R = require('ramda')
 const T = require('./NumberTheory');
-const N = 1e4;
+const N = 1e1;
 const Tn = new T(N);
 
 function S(n){
@@ -10,10 +10,14 @@ function S(n){
 }
 
 function s(n){
-    return  Math.max.apply(this,max_powers(n).map($ => s_for_prime_power($[0], $[1])))
+    let res = 1;
+    for (let $ of max_powers(n)) {
+        Math.max(res, s_for_prime_power($[0], $[1]))
+    }
+    return res;
 }
 
-function max_powers(n){
+function* max_powers(n){
     let p, $n =n, res = [];
     for (let i = Tn.primes.length -1; p = Tn.primes[i], i >= 0  && p * p <= n; i--){
         let e = 0;
@@ -21,18 +25,20 @@ function max_powers(n){
             e++;
             $n/=p;
         }
-        if (e) res.push([p, e]);
+        if (e) yield [p, e]
     }
-    if ($n !== 1) res.push([$n, 1])
-    return res;
+    if ($n !== 1) yield [$n, 1]
 }
+
+let $s = {}
 function s_for_prime_power(p, e){
-    k = 0;
+    if ($s[p+':'+e]) return $s[p+':'+e];
+    let k = 0, _e = e;
     while (e > p) {
         k += p;
         e -= p + 1;
         for (let t = k; (t /= p) % p == 0;)--e;
     }
-    return (k + Math.max(0, e)) * p;
+    return $s[p+':'+_e] = (k + Math.max(0, e)) * p;
 }
-console.log(S(N*N))
+console.log(S(N*N), $s)
