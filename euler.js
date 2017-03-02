@@ -98,3 +98,5 @@ GLOBAL.primeGenerator = (function () {
   };
   return SoEPgClass;
 })();
+
+module.exports = GLOBAL
