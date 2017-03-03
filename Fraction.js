@@ -26,7 +26,7 @@ class Fraction {
 		return this.num + "/" + this.den
 	}
 	valueOf(){
-		return this.num + "/" + this.den
+		return this.num / this.den
 	}
 }
 module.exports = Fraction

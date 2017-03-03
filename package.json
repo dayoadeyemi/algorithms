@@ -8,6 +8,7 @@
     "highland": "^2.5.1",
     "hungarian-on3": "^0.3.1",
     "lucas-lehmer-test": "^1.0.4",
+    "matrixmath": "^2.2.2",
     "ramda": "^0.18.0"
   },
   "devDependencies": {},

@@ -23,6 +23,44 @@ class NumberTheory{
 	is_prime(p) {
 		return this._is_prime[p]
 	}
+	// # pairs a, b st 1 <= a,b <= N and gcd(a,b) = 1
+	static c(N){
+		let sqrt_N = ~~(Math.sqrt(N)), indexes = R.range(1, 1+sqrt_N)
+		for (let k = sqrt_N; k > 0; k--){
+			const N_over_k = ~~(N/k)
+			if (indexes[indexes.length-1] !== N_over_k) {
+				indexes.push(N_over_k)
+			}
+		}
+		const res = {}
+		for (let n of indexes){
+			let tmp = n*n
+			if (1 < n) {
+				const sqrt_n = ~~Math.sqrt(n)
+				for (let l = 1; l < sqrt_n+1; l++) {
+					tmp -= res[l] * (~~(n / l) - ~~(n/(l+1)))
+				}
+				for (let d = 2; d < 1 + ~~(n/(1 + sqrt_n)); d++){
+					tmp -= res[~~(n / d)]
+				}
+			}
+			res[n] = tmp
+		}
+		return res[N]
+	}
+	phi(n, i) {
+		this._phi = this._phi || { 1: 1 }
+		i = i || (this.primes.length - 1)
+		if (this._phi[n]) return this._phi[n]
+		for (let p; p = this.primes[i]; i--){
+			let pp = 1, k = 0;
+			while(n%(pp*p)===0) pp*=p
+			if (pp !== 1) {
+				return this._phi[n] = (pp-pp/p)*this.phi(n/pp, i)
+			}
+		}
+		throw new Error(`${n},${i}`)
+	}
 	divisors(n, i) {
 		i = i || (this.primes.length - 1)
 		if (this._divisors[n]) {
@@ -44,6 +82,30 @@ class NumberTheory{
 			else i--
 		}
 		return [n, 1]
+	}
+	static *farey_function(n, descending){
+		let a=0, b=1, c=1, d=n
+		let out = [];
+		if (descending) {
+			a=1
+			c=n-1
+		}
+		yield [a,b]
+		while ((c<=n&&!descending)||(a>0&&descending)){
+			let k = ~~((n+b)/d), p=a, q=b
+			a=c
+			b=d
+			c=k*c-p
+			d=k*d-q
+			yield [a,b]
+		}
+	}
+	static exp(x, i, n){
+		if (i === 0) return 1
+		if (i === 1) return n?x%n:x
+		const $ = exp(x, (i-i%2)/2, n);
+		const y = ($*$*(i%2?x:1))
+		return n?y%n:y
 	}
 	static gcd(a, b) {
 		if (a < 0) return NumberTheory.gcd(-a, b)
