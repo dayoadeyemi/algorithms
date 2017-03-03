@@ -2,18 +2,16 @@
 var R = require('ramda')
 class NumberTheory{
 	constructor(n){
-		this._is_prime = [false, false].concat(R.repeat(true, n-2))
-		this._divisors = { 1 : [1] }
-		var i = 1,j
-		while (i < Math.sqrt(n)) {
-			i++
-			if (!this._is_prime[i]) continue
-			j = i*i
-			while (j < n) {
-				this._is_prime[j] = false;
-				j+=i
+		this._n = n;
+		this._is_prime = Uint8Array(n)
+		for (let i = 2; i <  n; i++) this._is_prime[i] = 1
+		for (let i = 2; i <  n; i++) {
+			if (!this._is_prime[i])
+			for (let j = 2*i; j <  n; j+=i) {
+				this._is_prime[j] = 0
 			}
 		}
+		this._divisors = { 1 : [1] }
 
 		this.primes = global.SortedArray ? new SortedArray((a, b) => a > b) : []
 		for (var k = this._is_prime.length; k--;) {
@@ -21,7 +19,14 @@ class NumberTheory{
 		}
 	}
 	is_prime(p) {
-		return this._is_prime[p]
+		if (p < this._n) return this._is_prime[p];
+		else for (let q of this.primes) {
+			if (p % q === 0) {
+				return false
+			}
+		}
+		if (p < this._n*this._n ) return true
+		throw new Error('Cannot efficently decide primality') 
 	}
 	// # pairs a, b st 1 <= a,b <= N and gcd(a,b) = 1
 	static c(N){
@@ -138,66 +143,67 @@ class NumberTheory{
 		const lucasLehmerTest = require('lucas-lehmer-test');
 		return lucasLehmerTest(n);
 	}
-	static *prime_number_generator(){
-		const gen = new SoEPgClass();
-		let p;
-		while((p =  gen.next())<n) yield p;
+	static *it_primes(n){
+		const gen = new NumberTheory.SoEPgClass();
+		while(true) yield gen.next();
 	}
-}
-
-NumberTheory.SoEPgClass = SoEPgClass
-
-function SoEPgClass() {
-	this.bi = -1; // constructor resets the enumeration to start...
-}
-SoEPgClass.prototype.next = function () {
-	if (this.bi < 1) {
-		if (this.bi < 0) {
-			this.bi++;
-			this.lowi = 0; // other initialization done here...
-			this.bpa = [];
-			return 2;
-		} else { // bi must be zero:
-			var nxt = 3 + 2 * this.lowi + 262144; //just beyond the current page
-			this.buf = [];
-			for (var i = 0; i < 2048; i++) this.buf.push(0); // faster initialization 16 KByte's:
-			if (this.lowi <= 0) { // special culling for first page as no base primes yet:
-				for (var i = 0, p = 3, sqr = 9; sqr < nxt; i++, p += 2, sqr = p * p)
-				if ((this.buf[i >> 5] & (1 << (i & 31))) === 0)
-					for (var j = (sqr - 3) >> 1; j < 131072; j += p)
-						this.buf[j >> 5] |= 1 << (j & 31);
-			} else { // other than the first "zeroth" page:
-				if (!this.bpa.length) { // if this is the first page after the zero one:
-					this.bps = new SoEPgClass(); // initialize separate base primes stream:
-					this.bps.next(); // advance past the only even prime of 2
-					this.bpa.push(this.bps.next()); // keep the next prime (3 in this case)
-				}
-				// get enough base primes for the page range...
-				for (var p = this.bpa[this.bpa.length - 1], sqr = p * p; sqr < nxt;
-					p = this.bps.next(), this.bpa.push(p), sqr = p * p);
-				for (var i = 0; i < this.bpa.length; i++) { //for each base prime in the array
-				var p = this.bpa[i];
-				var s = (p * p - 3) >> 1; //compute the start index of the prime squared
-				if (s >= this.lowi) // adjust start index based on page lower limit...
-					s -= this.lowi;
-				else { //for the case where this isn't the first prime squared instance
-					var r = (this.lowi - s) % p;
-					s = (r != 0) ? p - r : 0;
-				}
-				//inner tight composite culling loop for given prime number across page
-				for (var j = s; j < 131072; j += p) this.buf[j >> 5] |= 1 << (j & 31);
+	static get SoEPgClass(){
+		function SoEPgClass() {
+			this.bi = -1; // constructor resets the enumeration to start...
+		}
+		SoEPgClass.prototype.next = function () {
+			if (this.bi < 1) {
+				if (this.bi < 0) {
+					this.bi++;
+					this.lowi = 0; // other initialization done here...
+					this.bpa = [];
+					return 2;
+				} else { // bi must be zero:
+					var nxt = 3 + 2 * this.lowi + 262144; //just beyond the current page
+					this.buf = [];
+					for (var i = 0; i < 2048; i++) this.buf.push(0); // faster initialization 16 KByte's:
+					if (this.lowi <= 0) { // special culling for first page as no base primes yet:
+						for (var i = 0, p = 3, sqr = 9; sqr < nxt; i++, p += 2, sqr = p * p)
+						if ((this.buf[i >> 5] & (1 << (i & 31))) === 0)
+							for (var j = (sqr - 3) >> 1; j < 131072; j += p)
+								this.buf[j >> 5] |= 1 << (j & 31);
+					} else { // other than the first "zeroth" page:
+						if (!this.bpa.length) { // if this is the first page after the zero one:
+							this.bps = new SoEPgClass(); // initialize separate base primes stream:
+							this.bps.next(); // advance past the only even prime of 2
+							this.bpa.push(this.bps.next()); // keep the next prime (3 in this case)
+						}
+						// get enough base primes for the page range...
+						for (var p = this.bpa[this.bpa.length - 1], sqr = p * p; sqr < nxt;
+							p = this.bps.next(), this.bpa.push(p), sqr = p * p);
+						for (var i = 0; i < this.bpa.length; i++) { //for each base prime in the array
+						var p = this.bpa[i];
+						var s = (p * p - 3) >> 1; //compute the start index of the prime squared
+						if (s >= this.lowi) // adjust start index based on page lower limit...
+							s -= this.lowi;
+						else { //for the case where this isn't the first prime squared instance
+							var r = (this.lowi - s) % p;
+							s = (r != 0) ? p - r : 0;
+						}
+						//inner tight composite culling loop for given prime number across page
+						for (var j = s; j < 131072; j += p) this.buf[j >> 5] |= 1 << (j & 31);
+						}
+					}
 				}
 			}
-		}
+			//find next marker still with prime status
+			while (this.bi < 131072 && this.buf[this.bi >> 5] & (1 << (this.bi & 31))) this.bi++;
+			if (this.bi < 131072) // within buffer: output computed prime
+				return 3 + ((this.lowi + this.bi++) * 2);
+			else { // beyond buffer range: advance buffer
+				this.bi = 0;
+				this.lowi += 131072;
+				return this.next(); // and recursively loop just once to make a new page buffer
+			}
+		};
+		return SoEPgClass
 	}
-	//find next marker still with prime status
-	while (this.bi < 131072 && this.buf[this.bi >> 5] & (1 << (this.bi & 31))) this.bi++;
-	if (this.bi < 131072) // within buffer: output computed prime
-		return 3 + ((this.lowi + this.bi++) * 2);
-	else { // beyond buffer range: advance buffer
-		this.bi = 0;
-		this.lowi += 131072;
-		return this.next(); // and recursively loop just once to make a new page buffer
-	}
-};
+}
+
+
 module.exports = NumberTheory
