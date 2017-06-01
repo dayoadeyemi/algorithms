@@ -4,6 +4,9 @@
   "description": "",
   "main": "BigInt.js",
   "dependencies": {
+    "@types/bignum": "0.0.29",
+    "@types/ramda": "0.0.10",
+    "bignum": "^0.12.5",
     "heap": "^0.2.6",
     "highland": "^2.5.1",
     "hungarian-on3": "^0.3.1",
