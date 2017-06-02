@@ -3,10 +3,10 @@ var R = require('ramda')
 class NumberTheory{
 	constructor(n){
 		this._n = n;
-		this._is_prime = Uint8Array(n)
+		this._is_prime = new Uint32Array(n)
 		for (let i = 2; i <  n; i++) this._is_prime[i] = 1
 		for (let i = 2; i <  n; i++) {
-			if (!this._is_prime[i])
+			if (!this._is_prime[i]) continue
 			for (let j = 2*i; j <  n; j+=i) {
 				this._is_prime[j] = 0
 			}

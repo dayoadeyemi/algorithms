@@ -1,4 +1,4 @@
-{
+
   "name": "problems",
   "version": "1.0.0",
   "description": "",
@@ -7,9 +7,11 @@
     "@types/bignum": "0.0.29",
     "@types/ramda": "0.0.10",
     "bignum": "^0.12.5",
+    "@aureooms/js-library": "0.0.1",
     "heap": "^0.2.6",
     "highland": "^2.5.1",
     "hungarian-on3": "^0.3.1",
+    "js-itertools": "^0.3.0",
     "lucas-lehmer-test": "^1.0.4",
     "matrixmath": "^2.2.2",
     "ramda": "^0.18.0"
