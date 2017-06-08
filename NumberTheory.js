@@ -28,6 +28,16 @@ class NumberTheory{
 		if (p < this._n*this._n ) return true
 		throw new Error('Cannot efficently decide primality') 
 	}
+	static phi_array(N, m){
+		const phi = new Uint32Array(N);
+		for (let i = 1; i < N; i++) phi[i] = i;
+
+		for (let i = 2; i < N; i++) {
+			if (phi[i] !== i) continue;
+			for (let j = i; j < N; j += i) phi[j] = phi[j] / i * (i - 1);
+		}
+		return phi
+	}
 	// # pairs a, b st 1 <= a,b <= N and gcd(a,b) = 1
 	static c(N){
 		let sqrt_N = ~~(Math.sqrt(N)), indexes = R.range(1, 1+sqrt_N)
