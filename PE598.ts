@@ -71,9 +71,7 @@ const c = (i: number, j: number, k: number, v: number[]) => {
 
 class Cache extends Object {
     private _data = {}
-    private _value = 0
     add(i,j,Cij){
-        if (i === j) this._value += Cij/2
         const pair = i+','+j
         this._data[pair] = (this._data[pair] || 0) + Cij
         return this
@@ -92,8 +90,16 @@ class Cache extends Object {
         }
         return _cache
     }
-    valueOf(){
-        return this._value;
+    diagWith(cache: Cache){
+        let res = 0
+        for (let [i, j, Cij] of this){
+            for (let [_i, _j, _Cij] of cache){
+                if (i*_i === j*_j) {
+                    res += Cij*_Cij
+                }
+            }
+        }
+        return res/2
     }
 }
 function* it(cache){
@@ -110,20 +116,20 @@ const rect = (v: number[]) => {
     return cache
 }
 
-console.log(rect([8, 4, 2, 1]))
+console.log(rect([8, 4]).diagWith(rect([2, 1])))
 
-const C_of_vector2 = v =>
-    range(1, max).reduce((m, i) => m + c(i, i, 0, v), 0)/2
+// const C_of_vector2 = v =>
+//     range(1, max).reduce((m, i) => m + c(i, i, 0, v), 0)/2
 
-const max = divisors([4, 4, 2, 1])
+// const max = divisors([4, 4, 2, 1])
 
 // for (let val of values([8, 4, 2, 1]))
 //     if (apply(equals, map(divisors, val)))
 //         console.log(val, map(divisors, val))
 
-console.log(C_of_vector2([8, 4, 2, 1]))
+// console.log(C_of_vector2([8, 4, 2, 1]))
 
-const C_of_n_factorial = n => 
-    C_of_vector(fact_as_vector(n))
+// const C_of_n_factorial = n => 
+//     C_of_vector(fact_as_vector(n))
 
 // for (let val of values(fact_as_vector(30))) console.log(map(divisors, val))
